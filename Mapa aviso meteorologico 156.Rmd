@@ -1,0 +1,162 @@
+---
+title: "INCREMENTO DE TEMPERATURA DIURNA EN LA SELVA (EXTENSIÓN DEL AVISO 156)"
+author: "Gorky Florez Castillo"
+date: "9/8/2021"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    theme: cerulean
+---
+
+```{r setup, include=FALSE}
+require(pacman)
+pacman::p_load(png,broom,tidyverse,leaflet, leaflet.extras, leaflet.providers,leafem,htmlwidgets, sp,
+               sf,readxl,mapview,RColorBrewer,viridis,Rgb,ggplot2,raster,rmarkdown,flexdashboard,
+               crosstalk, DT,dplyr,htmltools,rgdal, broom,leafem,mapview, Rgb, raster,rmarkdown, 
+               mapedit, tibble, cptcity)
+
+Peru_n          <- getData('GADM', country='Peru', level=2) %>% st_as_sf()       # Extracion del paiz
+Peru            <- getData('GADM', country='Peru', level=1) %>% st_as_sf()       # Extracion del paiz
+MDD             <- Peru_n %>%  filter(NAME_1 == "Madre de Dios")  
+MDD_t           <- Peru   %>%  filter(NAME_1 == "Madre de Dios")  
+data_09         <- st_read ("SHP/Aviso 156/view_aviso.shp")
+data_09_Ama     <- subset(data_09, nivel  == "Nivel 2")
+
+data_10         <- st_read ("SHP/Aviso 156/view_aviso(1).shp")
+data_10_Ama     <- subset(data_10, nivel  == "Nivel 2")
+data_10_nar     <- subset(data_10, nivel  == "Nivel 3")
+
+data_11         <- st_read ("SHP/Aviso 156/view_aviso(2).shp")
+data_11_Ama     <- subset(data_11, nivel  == "Nivel 2")
+#Definiendo el Logo
+m="https://images.vexels.com/media/users/3/143561/isolated/preview/afa3aa927b63061e3b0222b7dab9cdbf-ubicaci--n-n--utica-norte-flecha-vintage-by-vexels.png"
+
+
+```
+Aviso Meteorológico aumento de temperatura en RStudio
+===================================== 
+
+Column {data-width=550}
+-----------------------------------------------------------------------
+
+### Mapa Aviso Meteorológico Agosto 09
+```{r}
+leaflet() %>%
+  addControl(html = "<p><strong><em>INCREMENTO DE TEMPERATURA DIURNA EN LA SELVA (SENAMHI)</em></strong></p>", position ="topright")%>%
+  addLogo(m,url = "https://images.vexels.com/media/users/3/143561/isolated/preview/afa3aa927b63061e3b0222b7dab9cdbf-ubicaci--n-n--utica-norte-flecha-vintage-by-vexels.png",
+          position = "topleft", offset.x = 50,offset.y = 10,width = 100,height = 100)%>%
+  addPolygons(data= Peru, color = "#444444",fillOpacity = 0.001,group = "Departamentos")%>%
+  addScaleBar(position = "bottomright",options = scaleBarOptions(maxWidth = 100, metric = TRUE,
+                                                                 imperial = TRUE,updateWhenIdle = TRUE))%>%
+  addLegend(position = "bottomleft", colors="gold", labels = "Aumento de temperatura MADRE DE DIOS", opacity = 1)%>%
+  addLayersControl(baseGroups = c("OSM","Satellite"),overlayGroups = c("Departamentos","Amarillo"),
+                   position = "topright",options = layersControlOptions(collapsed = T))%>%
+  addProviderTiles(providers$OpenStreetMap, group = "OSM")%>%
+  addProviderTiles(providers$Esri.WorldImagery, group = "Satellite")%>%
+  addPolygons(data= data_09_Ama,color = "gold", weight = 2,fillOpacity = 0.8,fillColor = "gold",group = "Amarillo")%>%
+  addMiniMap(tiles = providers$Esri.WorldImagery,toggleDisplay = TRUE) 
+```
+Column {data-width=450}
+-----------------------------------------------------------------------
+### Mapa Aviso Meteorológico Agosto 10
+```{r map}
+leaflet() %>%
+  addControl(html = "<p><strong><em>INCREMENTO DE TEMPERATURA DIURNA EN LA SELVA (SENAMHI)</em></strong></p>", position ="topright")%>%
+  addLogo(m,url = "https://images.vexels.com/media/users/3/143561/isolated/preview/afa3aa927b63061e3b0222b7dab9cdbf-ubicaci--n-n--utica-norte-flecha-vintage-by-vexels.png",
+          position = "topleft", offset.x = 50,offset.y = 10,width = 100,height = 100)%>%
+  addPolygons(data= Peru, color = "#444444",fillOpacity = 0.001,group = "Departamentos")%>%
+  addScaleBar(position = "bottomright",options = scaleBarOptions(maxWidth = 100, metric = TRUE,
+                                                                 imperial = TRUE,updateWhenIdle = TRUE))%>%
+  addLegend(position = "bottomleft", colors="gold", labels = "Aumento de temperatura MADRE DE DIOS", opacity = 1)%>%
+  addLayersControl(baseGroups = c("OSM","Satellite"),overlayGroups = c("Departamentos","Naranja", "Amarillo"),
+                   position = "topright",options = layersControlOptions(collapsed = T))%>%
+  addProviderTiles(providers$OpenStreetMap, group = "OSM")%>%
+  addProviderTiles(providers$Esri.WorldImagery, group = "Satellite")%>%
+  addPolygons(data= data_10_Ama,color = "gold", weight = 2,fillOpacity = 0.8,fillColor = "gold",group = "Amarillo")%>%
+  addPolygons(data=data_10_nar   ,
+              color = "Orange",
+              weight = 2,
+              fillOpacity = 0.8,
+              fillColor = "Orange",
+              group = "Naranja")%>%
+  addMiniMap(tiles = providers$Esri.WorldImagery,toggleDisplay = TRUE) 
+```
+Column {data-width=450}
+-----------------------------------------------------------------------
+### Mapa Aviso Meteorológico Agosto 11
+
+```{r map2}
+leaflet() %>%
+  addControl(html = "<p><strong><em>INCREMENTO DE TEMPERATURA DIURNA EN LA SELVA (SENAMHI)</em></strong></p>", position ="topright")%>%
+  addLogo(m,url = "https://images.vexels.com/media/users/3/143561/isolated/preview/afa3aa927b63061e3b0222b7dab9cdbf-ubicaci--n-n--utica-norte-flecha-vintage-by-vexels.png",
+          position = "topleft", offset.x = 50,offset.y = 10,width = 100,height = 100)%>%
+  addPolygons(data= Peru, color = "#444444",fillOpacity = 0.001,group = "Departamentos")%>%
+  addScaleBar(position = "bottomright",options = scaleBarOptions(maxWidth = 100, metric = TRUE,
+                                                                 imperial = TRUE,updateWhenIdle = TRUE))%>%
+  addLegend(position = "bottomleft", colors="gold", labels = "Aumento de temperatura MADRE DE DIOS", opacity = 1)%>%
+  addLayersControl(baseGroups = c("OSM","Satellite"),overlayGroups = c("Departamentos","Amarillo"),
+                   position = "topright",options = layersControlOptions(collapsed = T))%>%
+  addProviderTiles(providers$OpenStreetMap, group = "OSM")%>%
+  addProviderTiles(providers$Esri.WorldImagery, group = "Satellite")%>%
+  addPolygons(data= data_11_Ama,color = "gold", weight = 2,fillOpacity = 0.8,fillColor = "gold",group = "Amarillo")%>%
+  addMiniMap(tiles = providers$Esri.WorldImagery,toggleDisplay = TRUE) 
+
+```
+
+Information {data-orientation=rows data-icon="fa-info-circle"}
+===================================== 
+
+### Información de datos
+
+Los datos utilizados aquí provienen de INCREMENTO DE TEMPERATURA DIURNA EN LA SELVA (SENAMHI), que detalla el incremento de la temperatura en el Peru. En agosto. Estos datos se debe tratar con precaución.
+
+La metodología para la recopilación de datos se puede ver [aquí] (https://www.senamhi.gob.pe/?p=aviso-meteorologico-detalle-prueba&a=2021&b=2661&c=00&d=SENA).
+
+El objetivo princial de la presentacion es brindar las herramientas necesarias para poder representar datos cuantitativos y cualitativo en mapas vectoriales y raster. 
+
+Este panel se desarrolló el 08 de agosto del 2021 y, por lo tanto, es una instantánea de los datos en esta simulacion. 
+
+La información geográfica en cada distrito está distribuida por provincias y departamentos en el Perú.
+
+
+
+### NOTA BIOGRÁFICA
+
+Gorky florez Castillo, nacido en el Departamento del Cusco, Provincia de la Convención, Distrito de Santa Ana el 07 de agosto de 1997. Curso sus estudios primarios en la Institución Educativa Juan de la Cruz Monte Salas y los secundarios en el “Glorioso colegio Emblemático Manco II”, de la ciudad de Quillabamba. 
+
+Bachiller con mención en la Carrera Profesional de Ingeniería Forestal y Medio Ambiente de la Universidad Nacional Amazónica de Madre de Dios el año, desde el 23 de diciembre del 2020. Participación activa en Proyectos de investigación u otras actividades que involucren de nuestros recursos Naturales, a la conservación, a la educación y conciencia ambiental, de esta forma contribuir al desarrollo del departamento de Madre de Dios y mi país.
+
+Realizo un artículo de investigación de caracterización morfológica y estructura poblacional de Euterpe precatoria (Arecaceae) en dos tipos de bosque (bosque de tierra firme y bosque inundable publicado en la revista ecuatoriana Bosques Latitud Cero (Florez-castillo, Nieto-ramos y Garate-quispe 2020).
+
+
+
+### Otra información
+Que es  Google Earth Engine
+Google Earth Engine es una plataforma basada en la nube que permite a los usuarios tener un fácil acceso a un archivo de datos de teledetección a escala de petabytes y ejecutar análisis geoespaciales en la infraestructura de Google. Actualmente, Google ofrece soporte solo para Python y JavaScript. Rgee llenará el vacío comenzando a brindar apoyo a R. A continuación, encontrará la comparación entre la sintaxis de rgee y las dos bibliotecas cliente compatibles con Google.
+
+El repositorio de GitHub y el código subyacente de este panel se pueden encontrar aquí. [here]()
+
+Este dashbaord se desarrolló utilizando [R Studio] (https://www.rstudio.com/) y los siguientes paquetes:
+
+* [RMarkdown](https://rmarkdown.rstudio.com/) para análisis reproducibles en documentos de calidad
+*  [flexdashbaord](https://rmarkdown.rstudio.com/flexdashboard/) para formatear en RMarkdown
+* [DT](https://rstudio.github.io/DT/) para tablas interactivas
+* [crosstalk](https://rstudio.github.io/crosstalk/) para widgets html interactivos en RMarkdown
+
+
+Se presenta otros manuales y ejemplos del uso de Google Earth Engine en RStudio
+
+* [Aviso de friaje - (SENAMHI)](https://gorkyflorez.github.io/Aviso_Friaje_MDD/) 
+*  [NDVI de Yungay](https://gorkyflorez.github.io/Google_Earth_Engine_RStudio_/) 
+* [Calcule la tendencia de las luces nocturnas ](https://gorkyflorez.github.io/luces_nocturnas_GEE/) 
+* [Perdida de la cobertura boscosa en la cuenca chonta](https://gorkyflorez.github.io/Analisis_cambio_cobertura_boscosa_microcuenca_chonta/) 
+
+* [INCREMENTO DE TEMPERATURA DIURNA EN LA SELVA](https://gorkyflorez.github.io/Aviso_SENAMHI_155/) 
+*  [NDVI de Yungay](https://gorkyflorez.github.io/Google_Earth_Engine_RStudio_/) 
+* [Índice de agua de diferencia normalizada Sentinel-2 (NDWI)](https://gorkyflorez.github.io/Google_Earth_Engine_NDWI_Dhaka/) 
+* [NDVI en Git de Madre de Dios 2013-2014](https://gorkyflorez.github.io/GEE_NDVI_MDD_Arequi/) 
+* [Modelo digital de elevación](https://gorkyflorez.github.io/GEE_DEM/) 
+
+
+
